@@ -1,0 +1,8 @@
+requests-toolbelt==0.8.0
+selenium==3.14.1
+requests==2.21.0
+PyMysql==0.9.2
+bs4==0.0.1
+xmlrunner==1.7.7
+BeautifulReport==0.0.7
+paramiko==2.4.2

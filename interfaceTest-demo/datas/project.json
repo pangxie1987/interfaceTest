@@ -1,0 +1,55 @@
+{
+    "project":
+    {
+        "id": "",
+        "name": "接口测试专用项目",
+        "briefName": "interfacetest",
+        "productType": 1,
+        "manageType": 1,
+        "issuing_scale":"1666998.65",
+        "deptManager":1,
+        "investmentSponsor": "",
+        "productCarrier": "",
+        "trustee": 1,
+        "relationProject":"",
+        "manager": 1,
+        "hasSameType": 0,
+        "businessType": 1,
+        "investmentAdviser": "",
+        "applyForm": 1,
+        "meetingSummary": 1,
+        "status": 1,
+        "valid": true,
+        "createby": 1,
+        "createdate": "2019-01-22 13:32:25",
+        "updateby": 1,
+        "updatedate": "2019-01-22 13:32:25"
+    },
+
+    "nproject":
+    {
+        "id": "",
+        "name": "接口测试专用项目-非标",
+        "briefName": "interfacetest",
+        "productType": 2,
+        "manageType": 1,
+        "issuing_scale":"1666998.65",
+        "deptManager":1,
+        "investmentSponsor": "",
+        "productCarrier": "",
+        "trustee": 1,
+        "manager": 1,
+        "hasSameType": 0,
+        "relationProject":"",
+        "businessType": 5,
+        "investmentAdviser": "",
+        "applyForm": 1,
+        "meetingSummary": 1,
+        "status": 1,
+        "valid": true,
+        "createby": 1,
+        "createdate": "2019-01-22 13:32:25",
+        "updateby": 1,
+        "updatedate": "2019-01-22 13:32:25"
+    }
+}

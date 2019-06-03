@@ -1,0 +1,46 @@
+{
+    "url":"http://172.16.100.22:6002/",
+    "userinfo":{
+        "username":"admin",
+        "password":"tebon2017",
+        "kaptcha":"888888",
+        "phonecode":"",
+        "smsSend":true
+    },
+
+     "successuser":{
+        "username":"admin",
+        "password":"tebon2017",
+        "kaptcha":"888888"
+     },
+
+    "nophoneuser":{
+        "username":"hpw3",
+        "password":"!QAZ2wsx",
+        "kaptcha":"888888"
+    },
+
+    "frozenuser":{
+        "username":"hpw5",
+        "password":"!QAZ2wsx",
+        "kaptcha":"888888"
+    },
+
+    "deleteuser":{
+        "username":"hpw4",
+        "password":"!QAZ2wsx",
+        "kaptcha":"888888"
+    },
+
+    "uiauto1":{
+        "username":"yuhc",
+        "password":"Xzw1992422!",
+        "kaptcha":"888888"
+    },
+
+    "uiauto2":{
+        "username":"jiangxl",
+        "password":"Xzw1992422!",
+        "kaptcha":"888888"
+    }
+}

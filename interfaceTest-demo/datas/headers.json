@@ -1,0 +1,12 @@
+{
+    "header_www":{
+        "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8"
+                },
+    "header_json":{
+        "Content-Type": "application/json"
+                },
+    "header_file":{
+        "Content-Type": "application/octet-stream"
+                }
+
+}
