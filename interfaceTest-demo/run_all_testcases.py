@@ -5,7 +5,7 @@ import os
 import sys
 import time
 import shutil
-from comm import HTMLTestRunner
+from comm import HTMLTestRunner_cn as HTMLTestRunner
 from comm.logset import logger
 from comm.email import send_email
 from comm.logset import get_host_ip, testnet
