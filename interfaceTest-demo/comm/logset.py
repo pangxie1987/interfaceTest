@@ -9,7 +9,7 @@ fapath = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(fapath)
 import requests
 from comm.readjson import read
-from comm.config import log_conf
+from comm.config import project_conf
 
 url = read('commdata.json')['url']
 logpath = os.path.join(os.path.dirname(os.path.dirname(__file__)), "report")
@@ -23,7 +23,7 @@ def loginit():
                     format='%(asctime)s %(filename)s[line:%(lineno)d] %(levelname)s %(message)s',
                     #datefmt='%a, %d %b %Y %H:%M:%S',
                     datefmt= '%Y-%m-%d %H:%M:%S',
-                    filename=os.path.join(logpath, log_conf.filename),
+                    filename=os.path.join(logpath, project_conf.project+'.log'),
                     filemode='w')
     #定义一个StreamHandler，将INFO级别或更高的日志信息打印到标准错误，并将其添加到当前的日志处理对象#
     console = logging.StreamHandler()

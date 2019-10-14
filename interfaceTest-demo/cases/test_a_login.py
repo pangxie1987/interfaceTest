@@ -45,6 +45,7 @@ class Login(unittest.TestCase):
     def setUpClass(self):
         '获取登录页的cookie'
         r = requests.get(url=url+'/login')
+        print(r.url)        # 必须有这一行，统计接口数量用
         Login.mycookie = r.cookies.get_dict()
         if '获取验证码' in r.text:
             globals()["sendsms"] = 1
@@ -98,6 +99,7 @@ class Login(unittest.TestCase):
             print('*'*30+'发送验证码')
             payload = b'reqSmsCode='+self.encode_base64()
             r =requests.post(url=url+'sendSMS', data=payload, headers=header_www)
+            print(r.url)
             #print(r.text)
             #Login.phonecode = r.json()['data']
             self.assertEqual('用户不存在或非正常状态!', r.json()['message'])
@@ -110,6 +112,7 @@ class Login(unittest.TestCase):
         if globals()["sendsms"] ==1:
             payload = "JH222t0aW1lMX1hZG1pbg=="
             r =requests.post(url=url+'sendSMS', data=payload, headers=header_www)
+            print(r.url)
             self.assertIn('非法请求', r.json()['message'])
         else:
             print('*'*30+'不需要手机验证码')
@@ -119,6 +122,7 @@ class Login(unittest.TestCase):
         if globals()["sendsms"] ==1:
             payload = ""
             r =requests.post(url=url+'sendSMS', data=payload, headers=header_www)
+            print(r.url)
             self.assertIn('非法请求', r.json()['message'])
         else:
             print('*'*30+'不需要手机验证码')
@@ -130,6 +134,7 @@ class Login(unittest.TestCase):
             print('*'*30+'发送验证码')
             payload = b'reqSmsCode='+self.encode_base64()
             r =requests.post(url=url+'sendSMS', data=payload, headers=header_www)
+            print(r.url)
             self.assertIn('登陆失败!用户名或密码错误', r.json()['message'])
         else:
             print('*'*30+'不需要手机验证码')
@@ -146,6 +151,7 @@ class Login(unittest.TestCase):
             print('*'*30+'发送验证码')
             payload = b'reqSmsCode='+self.encode_base64()
             r =requests.post(url=url+'sendSMS', data=payload, headers=header_www)
+            print(r.url)
             #print(r.text)
             #Login.phonecode = r.json()['data']
             self.assertEqual('手机号为空,请修改个人信息', r.json()['message'])
@@ -165,6 +171,7 @@ class Login(unittest.TestCase):
             print('*'*30+'发送验证码')
             payload = b'reqSmsCode='+self.encode_base64()
             r =requests.post(url=url+'sendSMS', data=payload, headers=header_www)
+            print(r.url)
             #print(r.text)
             Login.djphonecode = r.json()['data']
             self.assertEqual('用户不存在或非正常状态!', r.json()['message'])
@@ -184,6 +191,7 @@ class Login(unittest.TestCase):
             print('*'*30+'发送验证码')
             payload = b'reqSmsCode='+self.encode_base64()
             r =requests.post(url=url+'sendSMS', data=payload, headers=header_www)
+            print(r.url)
             #print(r.text)
             #Login.phonecode = r.json()['data']
             self.assertEqual('用户不存在或非正常状态!', r.json()['message'])
@@ -201,6 +209,7 @@ class Login(unittest.TestCase):
             print('*'*30+'发送验证码')
             payload = b'reqSmsCode='+self.encode_base64()
             r =requests.post(url=url+'sendSMS', data=payload, headers=header_www)
+            print(r.url)
             #print(r.text)
             Login.phonecode = r.json()['data']
             self.assertEqual('发送正常', r.json()['message'])
@@ -217,6 +226,7 @@ class Login(unittest.TestCase):
             print('*'*30+'发送验证码')
             payload = b'reqSmsCode='+self.encode_base64()
             r =requests.post(url=url+'sendSMS', data=payload, headers=header_www)
+            print(r.url)
             #print(r.text)
             #Login.phonecode = r.json()['data']
             self.assertEqual('不能重复发送', r.json()['message'])
@@ -238,6 +248,7 @@ class Login(unittest.TestCase):
         user['username'] = ''
         print(user)
         r = requests.post(url=url+'login',data=user, headers=header_www, cookies=Login.mycookie)
+        print(r.url)
         print(r.text)
         self.assertIn('用户名或密码不存在', r.text)
 
@@ -255,6 +266,7 @@ class Login(unittest.TestCase):
         del user['username']
         print(user)
         r = requests.post(url=url+'login',data=user, headers=header_www, cookies=Login.mycookie)
+        print(r.url)
         print(r.text)
         self.assertIn('用户名或密码不存在', r.text)
 
@@ -272,6 +284,7 @@ class Login(unittest.TestCase):
         user['username'] = 'admin0009'
         print(user)
         r = requests.post(url=url+'login',data=user, headers=header_www, cookies=Login.mycookie)
+        print(r.url)
         print(r.text)
         self.assertIn('登陆失败!用户名或密码错误', r.text)
 
@@ -283,6 +296,7 @@ class Login(unittest.TestCase):
         #user['kaptcha'] = '888888'
         print(user)
         r = requests.post(url=url+'login',data=user, headers=header_www, cookies=Login.mycookie)
+        print(r.url)
         print(r.text)
         self.assertIn('用户名或密码不存在', r.text)
 
@@ -294,6 +308,7 @@ class Login(unittest.TestCase):
         #user['kaptcha'] = '888888'
         print(user)
         r = requests.post(url=url+'login',data=user, headers=header_www, cookies=Login.mycookie)
+        print(r.url)
         print(r.text)
         self.assertIn('用户名或密码不存在', r.text)
 
@@ -305,6 +320,7 @@ class Login(unittest.TestCase):
         #user['kaptcha'] = '888888'
         print(user)
         r = requests.post(url=url+'login',data=user, headers=header_www, cookies=Login.mycookie)
+        print(r.url)
         print(r.text)
         self.assertIn('登陆失败!用户名或密码错误！', r.text)
 
@@ -317,6 +333,7 @@ class Login(unittest.TestCase):
             user['phonecode'] = ''
             print(user)
             r = requests.post(url=url+'login',data=user, headers=header_www, cookies=Login.mycookie)
+            print(r.url)
             print(r.text)
             self.assertIn('验证码不正确', r.text)
         else:
@@ -330,6 +347,7 @@ class Login(unittest.TestCase):
         user['kaptcha'] = ''
         print(user)
         r = requests.post(url=url+'login',data=user, headers=header_www, cookies=Login.mycookie)
+        print(r.url)
         print(r.text)
         self.assertIn('验证码不正确', r.text)
 
@@ -341,6 +359,7 @@ class Login(unittest.TestCase):
         user['kaptcha'] = '123'
         print(user)
         r = requests.post(url=url+'login',data=user, headers=header_www, cookies=Login.mycookie)
+        print(r.url)
         print(r.text)
         self.assertIn('验证码不正确', r.text)
 
@@ -352,6 +371,7 @@ class Login(unittest.TestCase):
         del user['kaptcha']
         print(user)
         r = requests.post(url=url+'login',data=user, headers=header_www, cookies=Login.mycookie)
+        print(r.url)
         print(r.text)
         self.assertIn('验证码不正确', r.text)
 
@@ -363,6 +383,7 @@ class Login(unittest.TestCase):
         user['kaptcha'] = 'aaaaaa'
         print(user)
         r = requests.post(url=url+'login',data=user, headers=header_www, cookies=Login.mycookie)
+        print(r.url)
         print(r.text)
         self.assertIn('验证码不正确', r.text)
 
@@ -375,6 +396,7 @@ class Login(unittest.TestCase):
             user['phonecode'] = ''
             print(user)
             r = requests.post(url=url+'login',data=user, headers=header_www, cookies=Login.mycookie)
+            print(r.url)
             print(r.text)
             self.assertIn('验证码不正确', r.text)
         else:
@@ -389,6 +411,7 @@ class Login(unittest.TestCase):
             user['phonecode'] = '12345678901'
             print(user)
             r = requests.post(url=url+'login',data=user, headers=header_www, cookies=Login.mycookie)
+            print(r.url)
             print(r.text)
             self.assertIn('验证码不正确', r.text)
         else:
@@ -403,6 +426,7 @@ class Login(unittest.TestCase):
             del user['phonecode']
             print(user)
             r = requests.post(url=url+'login',data=user, headers=header_www, cookies=Login.mycookie)
+            print(r.url)
             print(r.text)
             self.assertIn('验证码不正确', r.text)
         else:
@@ -421,11 +445,13 @@ class Login(unittest.TestCase):
             user['phonecode'] = Login.djphonecode
             print(user)
             r = requests.post(url=url+'login',data=user, headers=header_www, cookies=Login.mycookie)
+            print(r.url)
             print(r.text)
             self.assertIn('验证码不正确', r.text)
         else:
             print(user)
             r = requests.post(url=url+'login',data=user, headers=header_www, cookies=Login.mycookie)
+            print(r.url)
             print(r.text)
             self.assertIn('登陆失败!用户名或密码错误', r.text)
 
@@ -441,6 +467,7 @@ class Login(unittest.TestCase):
             user['kaptcha'] = deleteuser['kaptcha']
             print(user)
             r = requests.post(url=url+'login',data=user, headers=header_www, cookies=Login.mycookie)
+            print(r.url)
             print(r.text)
             self.assertIn('登陆失败!用户名或密码错误', r.text)
         else:
@@ -455,6 +482,7 @@ class Login(unittest.TestCase):
             user['phonecode'] = Login.phonecode
         print(user)
         r = requests.post(url=url+'login',data=user, headers=header_www, cookies=Login.mycookie)
+        print(r.url)
         print(r.text)
         # 将cookie写入文件中
         with open(cookiefile, 'w') as f:
@@ -466,11 +494,13 @@ class Login(unittest.TestCase):
     def test_i1_logout(self):
         '登出操作'
         r = requests.get(url=url+'loginout', headers=header_www, cookies=Login.mycookie)
+        print(r.url)
         print(r.text)
         self.assertIn('请输入用户名', r.text)
 
     # 退出后，再次登录
         r = requests.get(url = url + '/login')
+        print(r.url)
         Login.mycookie = r.cookies.get_dict()
         self.test_h1_login()
 

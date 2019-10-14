@@ -9,7 +9,7 @@ from comm import HTMLTestRunner_cn as HTMLTestRunner
 from comm.logset import logger
 from comm.email import send_email
 from comm.logset import get_host_ip, testnet
-
+from comm.config import email_conf
 
 import xmlrunner
 from BeautifulReport import BeautifulReport as bf
@@ -67,7 +67,7 @@ def report_xml(reppath):
 def report_html(reppath):
     '使用HTMLTestRunner生成html格式的测试报告'
     fp = open(reppath, 'wb+')
-    runner_b = HTMLTestRunner.HTMLTestRunner(stream=fp, title=u"DevOps接口测试报告", description=u"用例执行情况")
+    runner_b = HTMLTestRunner.HTMLTestRunner(stream=fp, title=email_conf.subject, description=u"用例执行情况")
     runner_b.run(all_case())
     fp.close()
 
@@ -78,7 +78,7 @@ def run_toga():
 def report_bf(reppath, fname):
     '使用BeautifulReport库生成格式更美观的html报告'
     run = bf(all_case()) #实例化BeautifulReport模块
-    run.report(filename=fname, report_dir=reppath, description='DevOps接口测试报告')
+    run.report(filename=fname, report_dir=reppath, description=email_conf.subject)
 
 if __name__ == '__main__':
     logger.info('本次执行地址：%s'%(get_host_ip()))
@@ -86,21 +86,21 @@ if __name__ == '__main__':
     mvreport(report_path, his_report_path)
     # 创建新的报告文件
     # report_abspsth = os.path.join(report_path,"result_"+now+".html")
-    report_name = "report_"+now
+    report_name = "report_"+now+'.html'
     logger.info('report_name:%s'%report_name)
 
     # 执行所有的case
     try:
         if testnet() == 0:
             logger.info('网络正常，开始执行测试任务')
-            report_html(os.path.join(report_path, report_name+".html"))
+            report_html(os.path.join(report_path, report_name))
             # report_xml(report_path)
             # report_bf(report_path, report_name)
-            flag = '测试任务执行成功'
+            flag = 'Sucess'
         else:
-            logger.info('测试环境网络异常，请检查！！！')
             flag = '测试环境网络异常，请检查！！！'
+            logger.info(flag)     
     except:
         flag = '测试任务执行出现异常，请检查！！！'
     finally:
-        send_email(os.path.join(report_path, report_name+".html"), flag)
+        send_email(os.path.join(report_path, report_name), report_name, flag)

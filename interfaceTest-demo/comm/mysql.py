@@ -13,8 +13,6 @@ from comm.config import mysql_conf
 
 host = mysql_conf.host
 port = mysql_conf.port
-dbname1 = mysql_conf.dbname1
-dbname2 = mysql_conf.dbname2
 user = mysql_conf.user
 passwd = mysql_conf.password
 
@@ -49,6 +47,14 @@ class mysqlconnect(object):
         self.cursor.execute(sql)
         self.cursor.execute('commit')
         return
+
+    def getlastid(self,sql):
+        '插入数据并获取自增id'
+        self.cursor.execute(sql)
+        newid = self.cursor.lastrowid
+        self.cursor.execute('commit')
+        print('the last id=%s'%newid)
+        return newid
 
     def closedb(self):
         '关闭数据库连接'

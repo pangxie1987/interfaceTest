@@ -99,17 +99,12 @@ Version in 0.7.1
 # TODO: color stderr
 # TODO: simplify javascript using ,ore than 1 class in the class attribute?
 import datetime
-import os
 import sys
 import unittest
 import copy
 import threading
 from xml.sax import saxutils
 from functools import cmp_to_key
-fapath = os.path.dirname(os.path.dirname(__file__))
-sys.path.append(fapath)
-from comm.mysql import mysqlconnect
-from comm.config import result_db, apicount, project_conf
 
 PY3K = (sys.version_info[0] > 2)
 if PY3K:
@@ -795,6 +790,7 @@ tr[id^=st]  td { background-color: #6f6f6fa1 !important ; }
 
 TestResult = unittest.TestResult
 
+
 class _TestResult(TestResult):
     # note: _TestResult is a pure representation of results.
     # It lacks the output and reporting ability compares to unittest._TextTestResult.
@@ -961,8 +957,6 @@ class HTMLTestRunner(Template_mixin):
         self.save_last_try=save_last_try
         self.verbosity = verbosity
         self.run_times=0
-        self.dbname = result_db.dbname
-        self.db = mysqlconnect(self.dbname)
         if title is None:
             self.title = self.DEFAULT_TITLE
         else:
@@ -1033,14 +1027,6 @@ class HTMLTestRunner(Template_mixin):
             status = u' '.join(status)
         else:
             status = 'none'
-        total2 = result.success_count+result.failure_count+result.error_count +result.skip_count
-        # 将执行结果插入数据库
-        sql = "INSERT INTO %s (project, sucesss, error, fail, skip, total, starttime, duration) VALUES ('%s', %s, %s, %s, %s, %s, '%s', '%s')"%(result_db.table,project_conf.project,result.success_count,result.error_count,result.failure_count,result.skip_count,total2,startTime,duration)
-        if result_db.isinsert == 1:
-            global dblastid
-            dblastid = self.db.getlastid(sql)
-        else:
-            pass
         return [
             (u'开始时间', startTime),
             (u'耗时', duration),
@@ -1090,13 +1076,9 @@ class HTMLTestRunner(Template_mixin):
         rows = []
         sortedResult = self.sortResult(result.result)
         for cid, (cls, cls_results) in enumerate(sortedResult):
-            print(cls_results)
             # subtotal for a class
             np = nf = ne = ns = 0
             for n, t, o, e in cls_results:
-                # lenapi = getapicount(apicount, o)    # 记录执行的接口数量
-                if 'http' in o:
-                    apicount.append(o)
                 if n == 0:
                     np += 1
                 elif n == 1:
@@ -1105,11 +1087,6 @@ class HTMLTestRunner(Template_mixin):
                     ne += 1
                 else:
                     ns +=1
-            if result_db.isinsert == 1:
-                lenapi = list(set(apicount)) 
-                # 将执行的接口覆盖数量写入数据库
-                sql = 'update %s set apicount=%s where id=%s'%(result_db.table, len(lenapi), dblastid)
-                self.db.update_data(sql)
 
             # format class description
             if cls.__module__ == "__main__":
