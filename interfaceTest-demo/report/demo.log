@@ -1,0 +1,5 @@
+2019-10-14 14:30:39 run_all_testcases.py[line:84] INFO 本次执行地址：192.168.208.151
+2019-10-14 14:30:39 run_all_testcases.py[line:90] INFO report_name:report_2019-10-14-14_30_39.html
+2019-10-14 14:30:42 logset.py[line:60] INFO 当前172.16.100.22正常
+2019-10-14 14:30:42 run_all_testcases.py[line:95] INFO 网络正常，开始执行测试任务
+2019-10-14 14:31:05 email.py[line:42] INFO 邮件发送完成！

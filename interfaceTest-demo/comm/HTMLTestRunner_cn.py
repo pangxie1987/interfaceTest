@@ -110,6 +110,7 @@ fapath = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(fapath)
 from comm.mysql import mysqlconnect
 from comm.config import result_db, apicount, project_conf
+from comm.logset import get_host_ip
 
 PY3K = (sys.version_info[0] > 2)
 if PY3K:
@@ -1035,7 +1036,8 @@ class HTMLTestRunner(Template_mixin):
             status = 'none'
         total2 = result.success_count+result.failure_count+result.error_count +result.skip_count
         # 将执行结果插入数据库
-        sql = "INSERT INTO %s (project, sucesss, error, fail, skip, total, starttime, duration) VALUES ('%s', %s, %s, %s, %s, %s, '%s', '%s')"%(result_db.table,project_conf.project,result.success_count,result.error_count,result.failure_count,result.skip_count,total2,startTime,duration)
+        ipaddress = get_host_ip()
+        sql = "INSERT INTO %s (project, sucesss, error, fail, skip, total, starttime, duration, ipaddress) VALUES ('%s', %s, %s, %s, %s, %s, '%s', '%s', '%s')"%(result_db.table,project_conf.project,result.success_count,result.error_count,result.failure_count,result.skip_count,total2,startTime,duration, ipaddress)
         if result_db.isinsert == 1:
             global dblastid
             dblastid = self.db.getlastid(sql)

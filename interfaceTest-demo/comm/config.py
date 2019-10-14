@@ -2,8 +2,8 @@
 '''
 通用配置文件
 '''
-IsSmoke = 1     # 0-非冒烟 1-冒烟
-apicount = []   # 接口数量，统计接口用
+IsSmoke = 1     # 执行方式：0-非冒烟测试 1-冒烟测试
+apicount = []   # 统计接口数量用，无需配置
 
 class project_conf():
     '项目通用配置'

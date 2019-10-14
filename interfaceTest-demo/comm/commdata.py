@@ -1,4 +1,8 @@
+'''
+接口测试全局参数配置
+'''
 class cdatas:
+    '全局参数'
     cpid = 5            #产品编号
     npid = 10           #定向产品编号
     agencyid = 0        #机构编号
@@ -18,7 +22,8 @@ class cdatas:
     nitemsid = 150        #非标标的id
     spoolid = 0         #标准出入池id
     npoolid = 42         #非标出入池id
-#项目类型
+
+# 项目类型
 product_type = {
     '标准':1,
     '非标':2,
