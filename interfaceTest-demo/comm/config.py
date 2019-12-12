@@ -27,6 +27,7 @@ class mysql_conf():
 
 class result_db():
     '测试结果数据库配置'
-    table = "result"
+    table = "result"    # 测试结果统计
+    apitable = 'apicount'   #各项目接口数量统计
     dbname = 'testresult'
     isinsert = 1    # 0-测试结果不入库，1-测试结果入库

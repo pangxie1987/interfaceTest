@@ -10,7 +10,7 @@ Target Server Type    : MYSQL
 Target Server Version : 50719
 File Encoding         : 65001
 
-Date: 2019-10-14 14:31:25
+Date: 2019-10-10 17:30:07
 */
 
 SET FOREIGN_KEY_CHECKS=0;
@@ -31,6 +31,5 @@ CREATE TABLE `result` (
   `duration` text COMMENT '执行耗时',
   `version` varchar(255) DEFAULT NULL COMMENT '测试项目版本',
   `apicount` int(11) DEFAULT NULL COMMENT '本次执行覆盖的接口数',
-  `ipaddress` varchar(255) DEFAULT NULL COMMENT '案例执行地址',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=61 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=44 DEFAULT CHARSET=utf8;

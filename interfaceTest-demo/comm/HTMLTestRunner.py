@@ -95,9 +95,14 @@ import io
 import sys
 import time
 import unittest
+import os
 from xml.sax import saxutils
-
-
+fapath = os.path.dirname(os.path.dirname(__file__))
+sys.path.append(fapath)
+from comm.mysql import mysqlconnect
+from comm.config import result_db, apicount, project_conf
+from comm.objectsort import getapicount
+from comm.logset import get_host_ip
 
 # ------------------------------------------------------------------------
 # The redirectors below are used to capture output during testing. Output
@@ -522,6 +527,7 @@ class _TestResult(TestResult):
         self.success_count = 0
         self.failure_count = 0
         self.error_count = 0
+        self.skip_count = 0
         self.verbosity = verbosity
 
         # result is a list of result in 4 tuple
@@ -591,6 +597,19 @@ class _TestResult(TestResult):
         else:
             sys.stderr.write('E')
 
+    def addSkip(self, test, reason):
+        self.skip_count += 1
+        self.status = 0
+        TestResult.addSkip(self, test,reason)
+        output = self.complete_output()
+        self.result.append((3, test, output, reason))
+        if self.verbosity > 1:
+            sys.stderr.write('K')
+            sys.stderr.write(str(test))
+            sys.stderr.write('\n')
+        else:
+            sys.stderr.write('K')
+
     def addFailure(self, test, err):
         self.failure_count += 1
         TestResult.addFailure(self, test, err)
@@ -611,6 +630,9 @@ class HTMLTestRunner(Template_mixin):
     def __init__(self, stream=sys.stdout, verbosity=1, title=None, description=None):
         self.stream = stream
         self.verbosity = verbosity
+        self.dbname = result_db.dbname
+        self.dblastid = 0
+        # self.db = mysqlconnect(self.dbname)
         if title is None:
             self.title = self.DEFAULT_TITLE
         else:
@@ -664,6 +686,15 @@ class HTMLTestRunner(Template_mixin):
             status = ' '.join(status)
         else:
             status = 'none'
+        self.db = mysqlconnect(self.dbname)
+        total2 = result.success_count+result.failure_count+result.error_count +result.skip_count
+        # 将执行结果插入数据库
+        ipaddress = get_host_ip()
+        sql = "INSERT INTO %s (project, sucesss, error, fail, skip, total, starttime, duration, ipaddress) VALUES ('%s', %s, %s, %s, %s, %s, '%s', '%s', '%s')"%(result_db.table,project_conf.project,result.success_count,result.error_count,result.failure_count,result.skip_count,total2,startTime,duration, ipaddress)
+        if result_db.isinsert == 1:
+            self.dblastid = self.db.getlastid(sql)
+        else:
+            pass
         return [
             ('Start Time', startTime),
             ('Duration', duration),
@@ -716,9 +747,16 @@ class HTMLTestRunner(Template_mixin):
             # subtotal for a class
             np = nf = ne = 0
             for n,t,o,e in cls_results:
+                if 'http' in o:
+                    apicount.append(o)
                 if n == 0: np += 1
                 elif n == 1: nf += 1
                 else: ne += 1
+            if result_db.isinsert == 1:
+                lenapi = list(set(apicount)) 
+                # 将执行的接口覆盖数量写入数据库
+                sql = 'update %s set apicount=%s where id=%s'%(result_db.table, len(lenapi), self.dblastid)
+                self.db.update_data(sql)
 
             # format class description
             if cls.__module__ == "__main__":

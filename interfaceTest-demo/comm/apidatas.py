@@ -13,11 +13,13 @@ import json
 import requests
 import unittest
 import pandas
-from comm.readjson import read
 from openpyxl import Workbook
+from comm.mysql import mysqlconnect
+from comm.config import result_db, project_conf
 
 path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'doc')
 url = 'http://172.16.101.224:9200'
+nowtime = time.strftime("%Y-%m-%d %H:%M:%S")
 
 total_message = []
 def get_apiurl():
@@ -25,6 +27,7 @@ def get_apiurl():
     r = requests.get(url=url+'/swagger-resources')
     #print(r.json())
     names = {}
+    total = 0   #接口数量
     for datas in r.json():
             name = datas['name']
             location = datas['location']
@@ -38,11 +41,12 @@ def get_apiurl():
             if apidatas != False:
                 createsheet(apidatas, name)
                 names[name] = len(apidatas)
+                total += len(apidatas)
             else:
                 continue
     print('本地落地的接口文件：',names)
     totalfile = os.path.join(path, 'total.txt')
-    nowtime = time.strftime("%Y-%m-%d %H:%M:%S")
+    insertdb(total)
     with open(totalfile, 'a+') as f:
         f.write('当前统计时间：%s'%nowtime+'\n')
         f.write(str(names)+'\n')
@@ -86,6 +90,13 @@ def createsheet(wtmessage, sheetname):
     df = pandas.DataFrame(wtmessage)
     with pandas.ExcelWriter(filepath) as f:
         df.to_excel(f, sheet_name=sheetname)
+
+def insertdb(total):
+    '将统计结果写入数据库'
+    db = mysqlconnect(result_db.dbname)
+    sql = "insert into %s (project, total, starttime) VALUES('%s', %s, '%s')"%(result_db.apitable, project_conf.project, total, nowtime)
+    db.update_data(sql)
+    print('数据库写入完成')
 
 if __name__ == '__main__':
     # get_api_doc()

@@ -963,7 +963,8 @@ class HTMLTestRunner(Template_mixin):
         self.verbosity = verbosity
         self.run_times=0
         self.dbname = result_db.dbname
-        self.db = mysqlconnect(self.dbname)
+        self.dblastid = 0
+        # self.db = mysqlconnect(self.dbname)
         if title is None:
             self.title = self.DEFAULT_TITLE
         else:
@@ -1034,13 +1035,13 @@ class HTMLTestRunner(Template_mixin):
             status = u' '.join(status)
         else:
             status = 'none'
+        self.db = mysqlconnect(self.dbname)
         total2 = result.success_count+result.failure_count+result.error_count +result.skip_count
         # 将执行结果插入数据库
         ipaddress = get_host_ip()
         sql = "INSERT INTO %s (project, sucesss, error, fail, skip, total, starttime, duration, ipaddress) VALUES ('%s', %s, %s, %s, %s, %s, '%s', '%s', '%s')"%(result_db.table,project_conf.project,result.success_count,result.error_count,result.failure_count,result.skip_count,total2,startTime,duration, ipaddress)
         if result_db.isinsert == 1:
-            global dblastid
-            dblastid = self.db.getlastid(sql)
+            self.dblastid = self.db.getlastid(sql)
         else:
             pass
         return [
@@ -1110,7 +1111,7 @@ class HTMLTestRunner(Template_mixin):
             if result_db.isinsert == 1:
                 lenapi = list(set(apicount)) 
                 # 将执行的接口覆盖数量写入数据库
-                sql = 'update %s set apicount=%s where id=%s'%(result_db.table, len(lenapi), dblastid)
+                sql = 'update %s set apicount=%s where id=%s'%(result_db.table, len(lenapi), self.dblastid)
                 self.db.update_data(sql)
 
             # format class description
