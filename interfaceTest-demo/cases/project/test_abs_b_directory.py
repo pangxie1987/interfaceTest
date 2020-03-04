@@ -6,6 +6,7 @@
 import os
 import sys
 fapath = os.path.dirname(os.path.dirname(__file__))
+fapath = os.path.join(fapath, '../')
 sys.path.append(fapath)
 import requests
 import unittest

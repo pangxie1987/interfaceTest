@@ -12,6 +12,7 @@ import base64
 import datetime
 import time
 fapath = os.path.dirname(os.path.dirname(__file__))
+fapath = os.path.join(fapath, '../')
 sys.path.append(fapath)
 import json
 import requests
