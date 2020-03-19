@@ -11,12 +11,16 @@ class project_conf():
 
 class email_conf():
     '邮件发送配置'
-    fromname = '18516292278@163.com'    #发件人
-    toname = '18516292278@163.com'      #收件人,多个用,隔开
+    fromname = '18516292278@163.com'    # 发件人名称
+    sender = '18516292278@163.com'      # 发件人邮箱
+    toname = '测试组成员'                #收件人名称
+    # receivers = ['18516292278@163.com'] #收件人邮箱
+    receivers = '18516292278@163.com'   #收件人邮箱
     subject = '【DEMO项目】接口测试报告'  #邮件主题
     server = 'smtp.163.com'             #邮件服务器
     user = '18516292278'                #用户名
     passwd = 'lpb201212'                #授权码（不是密码）
+    attchname = 'demo_report.html'     # 邮件中html附件名称
     
 class mysql_conf():
     '测试用例数据库配置'
