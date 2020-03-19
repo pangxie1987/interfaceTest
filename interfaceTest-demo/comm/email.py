@@ -13,6 +13,16 @@ casepath = os.path.abspath(os.path.dirname(os.path.dirname(__file__)))
 sys.path.append(casepath)
 from comm.logset import logger
 from comm.config import email_conf, project_conf
+from email.utils import parseaddr,formataddr
+
+def _format_addr(s):
+    '发件人名称转换'
+    name,addr = parseaddr(s)
+    # print (name)
+    print (addr)
+    #将邮件的name转换成utf-8格式
+    return formataddr((\
+        Header(name,'utf-8').encode(),addr ))
 
 def send_email(report_file, result):
     msg = MIMEMultipart()  # 混合MIME格式
@@ -26,7 +36,8 @@ def send_email(report_file, result):
         msg.attach(att1)
     except:
         print('找不到附件--%s'%report_file) 
-    msg['From'] = Header(email_conf.fromname)  # 发件人名称展示
+    send_name = email_conf.fromname+"<%s>"%(email_conf.sender)
+    msg['From'] = _format_addr(send_name)  # 发件人名称展示
     # msg['To'] = Header(email_conf.receivers)      # 收件人名称展示
     msg['To'] = email_conf.receivers            # 收件人名称展示
     msg['Subject'] = Header(email_conf.subject, 'utf-8')  # 中文邮件主题，指定utf-8编
