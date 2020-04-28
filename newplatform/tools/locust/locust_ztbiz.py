@@ -1,6 +1,6 @@
 from locust import TaskSet, HttpLocust, task
 
-xrbiz_url = 'http://172.16.101.224:9200'
+# xrbiz_url = 'http://172.16.101.224:9200'
 Authorization = 'Bearer 99331363-d4bf-47fe-8571-8dba3dd44829'
 
 header_www = {
@@ -91,3 +91,4 @@ class WebsiteUser(HttpLocust):
 	task_set=UserBehavior
 	min_wait=1
 	max_wait=1
+	host = 'http://172.16.101.224:9200'	# 命令中就不需要指定执行的IP

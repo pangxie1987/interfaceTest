@@ -8,7 +8,9 @@ locust -f locust_test.py --host=http:example.com(被测试主机的地址如：h
 在本地打开http://localhost:8089/，可以看到Locust WEB页面
 
 
-参考：https://www.cnblogs.com/imyalost/p/9758189.html
+Locust教程：
+	https://www.cnblogs.com/imyalost/p/9758189.html
+	http://www.testclass.net/locust/dev-script
 
 参数说明：
 	Number of users to simulate：设置模拟的用户总数
@@ -48,3 +50,34 @@ locust -f locust_test.py --host=http:example.com(被测试主机的地址如：h
 	Exceptions：异常请求的展示界面；
 
 	Download Data：测试数据下载模块， 提供三种类型的CSV格式的下载，分别是：Statistics、responsetime、exceptions；
+
+
+启动Locust
+
+	1、如果启动的locust文件名为locustfile.py并位于当前工作目录中，可以在编译器中直接运行该文件，或者通过cmd，执行如下命令：
+
+	 locust --host=https://www.cnblogs.com 
+
+	2、如果Locust文件位于子目录下且名称不是locustfile.py，可以使用-f命令启动上面的示例locust文件：
+
+	 locust -f testscript/locusttest.py --host=https://www.cnblogs.com 
+
+	3、如果要运行分布在多个进程中的Locust，通过指定-master以下内容来启动主进程 ：
+
+	 locust -f testscript/locusttest.py --master --host=https://www.cnblogs.com 
+
+	4、如果要启动任意数量的从属进程，可以通过-salve命令来启动locust文件：
+
+	 locust -f testscript/locusttest.py --salve --host=https://www.cnblogs.com 
+
+	5、如果要运行分布式Locust，必须在启动从机时指定主机（运行分布在单台机器上的Locust时不需要这样做，因为主机默认为127.0.0.1）：
+
+	 locust -f testscript/locusttest.py --slave --master-host=192.168.0.100 --host=https://cnblogs.com 
+
+	6、启动locust文件成功后，编译器控制台会显示如下信息：
+
+	 [2018-10-09 01:01:44,727] IMYalost/INFO/locust.main: Starting web monitor at *:8089
+
+	[2018-10-09 01:01:44,729] IMYalost/INFO/locust.main: Starting Locust 0.8 
+
+	PS：8089是该服务启动的端口号，如果是本地启动，可以直接在浏览器输入http://localhost:8089打开UI界面，如果是其他机器搭建locust服务，则输入该机器的IP+端口即可；

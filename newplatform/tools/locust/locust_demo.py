@@ -24,3 +24,7 @@ class websitUser(HttpLocust):
     #执行事物之间用户等待时间的下界，单位毫秒，相当于lr中的think time
     min_wait = 100
     max_wait = 200
+    # 设置 Locust 多少秒后超时，如果为 None ,则不会超时。
+    stop_timeout = 5
+    # 如果是 Web 服务的测试，host 相当于是提供 URL 前缀的默认值，但是如果在命令行中指定了 --host 选项，则以命令行中指定的为准。
+    host = 'https://www.baidu.com'
