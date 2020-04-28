@@ -1,0 +1,50 @@
+locust是一个可扩展的，分布式的，性能测试的，开源的，Python编写的性能测试框架
+pip install locustio
+pip install pyzmq  分布式运行locust
+
+执行：
+locust -f locust_test.py --host=http:example.com(被测试主机的地址如：http://www.126.com)
+
+在本地打开http://localhost:8089/，可以看到Locust WEB页面
+
+
+参考：https://www.cnblogs.com/imyalost/p/9758189.html
+
+参数说明：
+	Number of users to simulate：设置模拟的用户总数
+	Hatch rate (users spawned/second)：每秒启动的虚拟用户数
+	Start swarming：执行locust脚本
+
+测试结果说明：
+	Type：请求类型，即接口的请求方法；
+
+	Name：请求路径；
+
+	requests：当前已完成的请求数量；
+
+	fails：当前失败的数量；
+
+	Median：响应时间的中间值，即50%的响应时间在这个数值范围内，单位为毫秒；
+
+	Average：平均响应时间，单位为毫秒；
+
+	Min：最小响应时间，单位为毫秒；
+
+	Max：最大响应时间，单位为毫秒；
+
+	Content Size：所有请求的数据量，单位为字节；
+
+	reqs/sec：每秒钟处理请求的数量，即QPS；
+
+模块说明：
+	New test：点击该按钮可对模拟的总虚拟用户数和每秒启动的虚拟用户数进行编辑；
+
+	Statistics：类似于jmeter中Listen的聚合报告；
+
+	Charts：测试结果变化趋势的曲线展示图，分别为每秒完成的请求数（RPS）、响应时间、不同时间的虚拟用户数；
+
+	Failures：失败请求的展示界面；
+
+	Exceptions：异常请求的展示界面；
+
+	Download Data：测试数据下载模块， 提供三种类型的CSV格式的下载，分别是：Statistics、responsetime、exceptions；
