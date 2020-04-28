@@ -70,12 +70,20 @@ class UserBehavior(TaskSet):
 		print(r.text)
 		assert r.status_code == 200
 
-	@task(1)
+	@task(0)	# 设为0则不执行
 	def getIndustryList(self):
 		'行业列表查询'
 		payload = {'bizId':'e1447abe989148beb55a4b7bb4594160', 'bizType':2, 'sysId':1}
 		test_url = '/api-commonbiz/document/table'
 		r = self.client.post(test_url, data=payload, headers=header_www)
+		print(r.text)
+		assert r.status_code == 200
+
+	@task(1)
+	def getPriority(self):
+		'行业列表查询'
+		test_url = 'api-xrbiz/project/getPriority'
+		r = self.client.post(test_url, headers=header_www)
 		print(r.text)
 		assert r.status_code == 200
 
