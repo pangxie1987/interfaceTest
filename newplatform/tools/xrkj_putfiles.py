@@ -2,6 +2,7 @@
 远程Linux执行shell命令
 https://www.jb51.net/article/132770.htm
 https://www.cnblogs.com/pymkl/articles/9184737.html
+https://blog.csdn.net/littleRpl/article/details/90065836    # 文件目录上传下载
 '''
 import os
 import paramiko
@@ -26,29 +27,21 @@ class SSH(object):
         print(result)
         return result
         self.client.close()
+
+    def sftp_get(self, remotepath, localfile):
+        '下载文件'
+        sftp = self.client.open_sftp()
+        sftp.get(remotepath, localfile)
+        print('下载完成：{}'.format(remotepath))
     
-    def sftp(self, localfile, remotepath):
+    def sftp_put(self, localfile, remotepath):
         'sftp服务，创建或者传输文件'
         print('---------------- start put files:{} ----------------'.format(localfile))
         sftp = self.client.open_sftp()
         # 创建目录
         # sftp.mkdir('abc')
-        # 从远程主机下载文件，如果失败， 这个可能会抛出异常。
-        # sftp.get('test.sh', '/home/testl.sh')
-        # sftp.get(remotepath, localfile)
-        # 上传文件到远程主机，也可能会抛出异常
-        # 获取本地指定目录及其子目录下的所有文件
-        # 去掉路径字符穿最后的字符'/'，如果有的话
-        if remotepath[-1] == '/':
-            remotepath = remotepath[0:-1]
-
-        all_files = self.__get_all_files_in_local_dir(localfile)
-        print(all_files)
-        for x in all_files:
-            filename = os.path.split(x)[-1]
-            remote_filename = remotepath + '/' + filename
-            print ('Put文件%s传输中...' % filename)
-            sftp.put(x, remote_filename)
+        sftp.put(localfile, remotepath)
+        print('上传完成：{}'.format(remotepath))
 
     def __get_all_files_in_local_dir(self, local_dir):
         '获取本地指定目录及其子目录下的所有文件'
@@ -92,6 +85,6 @@ if __name__ == '__main__':
     # wincmd('mvn clean install -U -T 1C -Dmaven.test.skip=true -Dmaven.compile.fork=true')   # 编译
     ssh = SSH('172.16.101.225', 'root', 'tebon2017')    # 连接服务器
     # ssh.ssh_shell('ls -a')
-    ssh.sftp('D:/WorkSpace/GitLab/cloud2_new/tebonx-cloud-xrkj-ui/src', '/usr/kjbiz-front/kjbiz-ui-nginx/src')   # 上传文件
+    ssh.sftp_put('D:/WorkSpace/GitLab/cloud2_new/tebonx-cloud-xrkj-ui/src', '/usr/kjbiz-front/kjbiz-ui-nginx/src')   # 上传文件
     # ssh.ssh_shell('sh /root/war_bak/xrbiz-server/update_war.sh')  # 启动服务
-    
+    ssh.sftp_get('/root/war_bak/dist/index.html', 'C:/Users/tebon/Desktop/index.html')  # 下载文件
