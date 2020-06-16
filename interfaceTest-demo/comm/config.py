@@ -35,3 +35,12 @@ class result_db():
     apitable = 'apicount'   #各项目接口数量统计
     dbname = 'testresult'
     isinsert = 1    # 0-测试结果不入库，1-测试结果入库
+	
+class oracle_conf():
+    'oracle数据库配置'
+    host = "172.16.100.155"
+    port = "1521"
+    user = "hsfk"
+    password = "hsfk"
+    dbname = "TBDATA"
+    dbname2 = "zgcollmanager"
