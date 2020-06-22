@@ -5,17 +5,40 @@ import os
 import sys
 import time
 import shutil
-from comm import HTMLTestRunner_cn as HTMLTestRunner
+# from comm import HTMLTestRunner_cn as HTMLTestRunner
+from comm import HTMLTestRunner as HTMLTestRunner
 from comm.logset import logger
 from comm.email import send_email
 from comm.logset import get_host_ip, testnet
 from comm.config import email_conf
-
+from comm.config import result_devops
 import xmlrunner
 from BeautifulReport import BeautifulReport as bf
+
 '''
 使用该模块运行所以测试案例，并生成测试报告
 '''
+
+def getjkarg(args, n=3):
+    '''
+    获取jenkins传入的参数
+    n：jenkins传入参数的个数
+    systype：将要执行的系统
+    TASK_ID：任务ID
+    BUILD_NUMBER：jenkins构建号
+    '''
+    try:
+        if len(args) < n:
+            raise Exception('请设置脚本执行参数')
+        else:
+            logger.info(args)
+            # systype = sys.argv[1]                       # 执行项目：xr-星睿，zt-证投，all-所有，默认执行所有
+            result_devops.TASK_ID = sys.argv[2]         # 获取任务ID
+            result_devops.BUILD_NUMBER = sys.argv[3]    # 获取jenkins构建号
+            return True
+    except Exception as e:
+        logger.error(e)
+        return False
 
 #获取案例所在目录
 case_path = os.path.abspath(os.path.join(os.path.dirname(__file__), 'cases'))
@@ -47,7 +70,7 @@ def mvreport(npaht,hispath):
 
 def all_case():
     '获取所以要执行的案例,pattern规则'
-    discover = unittest.defaultTestLoader.discover(case_path, pattern="test_*.py",top_level_dir=None)
+    discover = unittest.defaultTestLoader.discover(case_path, pattern="test_b_zt*.py",top_level_dir=None)
     print (discover)
     return discover
 
@@ -81,6 +104,7 @@ def report_bf(reppath, fname):
     run.report(filename=fname, report_dir=reppath, description=email_conf.subject)
 
 if __name__ == '__main__':
+    getjkarg(sys.argv, 3)
     logger.info('本次执行地址：%s'%(get_host_ip()))
     now = time.strftime("%Y-%m-%d-%H_%M_%S", time.localtime(time.time()))
     mvreport(report_path, his_report_path)

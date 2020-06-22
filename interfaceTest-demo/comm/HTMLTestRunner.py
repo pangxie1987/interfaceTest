@@ -99,10 +99,12 @@ import os
 from xml.sax import saxutils
 fapath = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(fapath)
-from comm.mysql import mysqlconnect
-from comm.config import result_db, apicount, project_conf
-from comm.objectsort import getapicount
+from comm.mysql import mysqlconnect, mysqlconnectcommon
+from comm.config import result_db, result_devops, apicount, dblastid
+# from comm.objectsort import getapicount
 from comm.logset import get_host_ip
+from comm.logset import logger
+from comm.devops_caseadd import devopscase_add
 
 # ------------------------------------------------------------------------
 # The redirectors below are used to capture output during testing. Output
@@ -516,6 +518,14 @@ a.popup_link:hover {
 
 TestResult = unittest.TestResult
 
+# 测试案例执行耗时对象
+testcaseruntime = {}
+
+# 测试案例执行成功失败对象:sucesss=1，error+fail=2, skip=0
+testcaseispass = {}
+
+apicaseinfo = {}
+
 class _TestResult(TestResult):
     # note: _TestResult is a pure representation of results.
     # It lacks the output and reporting ability compares to unittest._TextTestResult.
@@ -541,6 +551,9 @@ class _TestResult(TestResult):
 
 
     def startTest(self, test):
+        # casestarttime案例开始执行时间
+        self.casestarttime = time.time()
+        # print('测试案例开始执行时间：', self.casestarttime)
         TestResult.startTest(self, test)
         # just one buffer for both stdout and stderr
         self.outputBuffer = io.StringIO()
@@ -570,6 +583,12 @@ class _TestResult(TestResult):
         # But there are some path in unittest that would bypass this.
         # We must disconnect stdout in stopTest(), which is guaranteed to be called.
         self.complete_output()
+        # 案例执行结束时间
+        # self.casesstoptime = datetime.datetime.now()
+        self.casesstoptime = time.time()
+        print(test)
+        # print('测试案例执行结束时间:', self.casesstoptime)
+        testcaseruntime[test._testMethodName] = (str(self.casesstoptime - self.casestarttime)[0:5]+'s')
 
 
     def addSuccess(self, test):
@@ -583,6 +602,7 @@ class _TestResult(TestResult):
             sys.stderr.write('\n')
         else:
             sys.stderr.write('.')
+        testcaseispass[test._testMethodName] = 1
 
     def addError(self, test, err):
         self.error_count += 1
@@ -596,6 +616,7 @@ class _TestResult(TestResult):
             sys.stderr.write('\n')
         else:
             sys.stderr.write('E')
+        testcaseispass[test._testMethodName] = 2
 
     def addSkip(self, test, reason):
         self.skip_count += 1
@@ -609,6 +630,7 @@ class _TestResult(TestResult):
             sys.stderr.write('\n')
         else:
             sys.stderr.write('K')
+        testcaseispass[test._testMethodName] = 0
 
     def addFailure(self, test, err):
         self.failure_count += 1
@@ -622,6 +644,7 @@ class _TestResult(TestResult):
             sys.stderr.write('\n')
         else:
             sys.stderr.write('F')
+        testcaseispass[test._testMethodName] = 2
 
 
 class HTMLTestRunner(Template_mixin):
@@ -630,9 +653,6 @@ class HTMLTestRunner(Template_mixin):
     def __init__(self, stream=sys.stdout, verbosity=1, title=None, description=None):
         self.stream = stream
         self.verbosity = verbosity
-        self.dbname = result_db.dbname
-        self.dblastid = 0
-        # self.db = mysqlconnect(self.dbname)
         if title is None:
             self.title = self.DEFAULT_TITLE
         else:
@@ -643,6 +663,38 @@ class HTMLTestRunner(Template_mixin):
             self.description = description
 
         self.startTime = datetime.datetime.now()
+        
+        # 测试案例执行结果插入devops数据库中
+        self.devopsdb = mysqlconnectcommon(result_devops.host, result_devops.port, result_devops.user, result_devops.password, result_devops.dbname)
+
+        # 测试结果汇总数据入库
+        self.testdb = mysqlconnectcommon(result_db.host, result_db.port, result_db.user, result_db.password, result_db.dbname)
+
+        # 定义接口自动化测试案例对象
+        self.apicaseinfo = {}
+
+        # 定义测试案例执行结果集
+        self.testcaseinfo = {
+            'TASK_ID':'',
+            'BUILD_NUMBER':'',
+            'AUTO_TESTCASE_ID':'',
+            'ZH_NAME':"",
+            'CASE_NAME':'',
+            'TIMES':'',
+            'CALLED':'',
+            'PERFORM_TIME':'',
+            'EXECUTE_ST':'',
+            'PASSED':'',
+            'FAILED':'',
+            'VERIFY_P':'',
+            'VERIFY_F':'',
+            'AUTOCASE':'',
+            'DATA_ST':1,
+            'REC_CREATER':'',
+            'REC_CRT_TMS':'',
+            'REC_MODIFIER':'',
+            'REC_UPD_TMS':''
+        }
 
 
     def run(self, test):
@@ -686,13 +738,20 @@ class HTMLTestRunner(Template_mixin):
             status = ' '.join(status)
         else:
             status = 'none'
-        self.db = mysqlconnect(self.dbname)
         total2 = result.success_count+result.failure_count+result.error_count +result.skip_count
+        logger.info(total2)
         # 将执行结果插入数据库
-        ipaddress = get_host_ip()
-        sql = "INSERT INTO %s (project, sucesss, error, fail, skip, total, starttime, duration, ipaddress) VALUES ('%s', %s, %s, %s, %s, %s, '%s', '%s', '%s')"%(result_db.table,project_conf.project,result.success_count,result.error_count,result.failure_count,result.skip_count,total2,startTime,duration, ipaddress)
         if result_db.isinsert == 1:
-            self.dblastid = self.db.getlastid(sql)
+            ipaddress = get_host_ip()
+            logger.info(ipaddress)
+            sql = "INSERT INTO %s (project, sucesss, error, fail, skip, total, starttime, duration, ipaddress) VALUES ('%s', %s, %s, %s, %s, %s, '%s', '%s', '%s')"%(result_db.table,result_db.project,result.success_count,result.error_count,result.failure_count,result.skip_count,total2,startTime,duration, ipaddress)
+        
+            global dblastid
+            logger.info(sql)
+            logger.info('测试结果开始插入数据库。。。')
+            dblastid = self.testdb.getlastid(sql)
+            logger.info('测试结果入库完成')
+            logger.info(dblastid)
         else:
             pass
         return [
@@ -755,8 +814,8 @@ class HTMLTestRunner(Template_mixin):
             if result_db.isinsert == 1:
                 lenapi = list(set(apicount)) 
                 # 将执行的接口覆盖数量写入数据库
-                sql = 'update %s set apicount=%s where id=%s'%(result_db.table, len(lenapi), self.dblastid)
-                self.db.update_data(sql)
+                sql = 'update %s set apicount=%s where id=%s'%(result_db.table, len(lenapi), dblastid)
+                self.testdb.update_data(sql)
 
             # format class description
             if cls.__module__ == "__main__":
@@ -765,7 +824,10 @@ class HTMLTestRunner(Template_mixin):
                 name = "%s.%s" % (cls.__module__, cls.__name__)
             doc = cls.__doc__ and cls.__doc__.split("\n")[0] or ""
             desc = doc and '%s: %s' % (name, doc) or name
-
+            self.test_suitname = cls.__module__     # 测试用例模块名称
+            self.test_classname = cls.__name__      # 测试模块类名
+            self.test_classname_d = doc             # 测试模块描述
+            
             row = self.REPORT_CLASS_TMPL % dict(
                 style = ne > 0 and 'errorClass' or nf > 0 and 'failClass' or 'passClass',
                 desc = desc,
@@ -779,10 +841,11 @@ class HTMLTestRunner(Template_mixin):
 
             for tid, (n,t,o,e) in enumerate(cls_results):
                 self._generate_report_test(rows, cid, tid, n, t, o, e)
+            
 
         report = self.REPORT_TMPL % dict(
             test_list = ''.join(rows),
-            count = str(result.success_count+result.failure_count+result.error_count),
+            count = str(result.success_count+result.failure_count+result.error_count+result.skip_count),
             Pass = str(result.success_count),
             fail = str(result.failure_count),
             error = str(result.error_count),
@@ -798,6 +861,91 @@ class HTMLTestRunner(Template_mixin):
         doc = t.shortDescription() or ""
         desc = doc and ('%s: %s' % (name, doc)) or name
         tmpl = has_output and self.REPORT_TEST_WITH_OUTPUT_TMPL or self.REPORT_TEST_NO_OUTPUT_TMPL
+
+        testcase_REC_CRT_TMS = str(self.startTime)[:19]     # 测试案例结果入库时间
+        test_casename_e = name      # 测试案例英文名称
+        test_casename_c = doc       # 测试案例中文名称
+        
+
+        if result_devops.isinsertcase == 1: # 测试用例入库判断
+            # 接口自动化测试案例数据构建
+            try:
+                self.apicaseinfo['projectKey'] = result_devops.projectKey
+                self.apicaseinfo['No'] = 0
+                self.apicaseinfo['Function'] = self.test_classname_d        # 一级子功能-使用模块描述
+                self.apicaseinfo['SubFunctionData'] = []
+
+                # --测试步骤和预期--
+                TestingProcedureData_1 = {
+                        
+                            "TestingProcedure": "",
+                            "ExpectedResultsData": ""
+                        }
+                TestingProcedureData_1['TestingProcedure'] = test_casename_c   # 测试步骤-取测试案例中文名称
+                
+                
+                # self.TestingProcedureData.append(TestingProcedureData_1)
+                TestCaseData_1 = {
+                                    "autoTestcase": "API-TTTT-0001", 
+                                    "TestCase": "测试用例1", 
+                                    "label": "API",  
+                                    "marker": "", 
+                                    "premise": "",
+                                    "TestingProcedureData": [] 
+                                }
+                # TestCaseData_1['autoTestcase'] = test_casename_e
+                TestCaseData_1['autoTestcase'] = result_devops.projectKey+'_'+test_casename_e   # 使用项目key+案例名称方式，避免重复
+                TestCaseData_1['TestCase'] = test_casename_c
+                TestCaseData_1['TestingProcedureData'].append(TestingProcedureData_1)
+
+                SubFunctionData_1 = {
+                                        'SubFunction':'',
+                                        'TestCaseData':[]
+                                    }
+                SubFunctionData_1['SubFunction'] = self.test_classname      # 二级子功能-使用模块类名
+                SubFunctionData_1['TestCaseData'].append(TestCaseData_1)
+                self.apicaseinfo['SubFunctionData'].append(SubFunctionData_1)
+
+                # 数据为list结构
+                # self.apicaseinfo = [self.apicaseinfo]
+                logger.info(self.apicaseinfo)
+                devopscase_add([self.apicaseinfo])    # 通过调用接口，将测试用例插入到devops库中
+            except Exception as e:
+                # logger.info(e)
+                print(e)
+        else:
+            pass
+
+        # print(self.testcaseinfo)
+        if result_devops.isinsert == 1:
+            
+            # 测试结果数据构建
+            self.testcaseinfo['TASK_ID'] = result_devops.TASK_ID
+            self.testcaseinfo['BUILD_NUMBER'] = result_devops.BUILD_NUMBER
+            self.testcaseinfo['AUTO_TESTCASE_ID'] = test_casename_e     # 自动化用例ID，取自动化用例的英文名称
+            self.testcaseinfo['ZH_NAME'] = str(test_casename_c)
+            self.testcaseinfo['CASE_NAME'] = test_casename_e
+            self.testcaseinfo['TIMES'] = ''                                         # 执行次数，暂时设为常量1
+            self.testcaseinfo['PERFORM_TIME'] = testcaseruntime[test_casename_e]   # 测试案例执行耗时
+            self.testcaseinfo['EXECUTE_ST'] = testcaseispass[test_casename_e]   # 案例执行结果
+            self.testcaseinfo['REC_CRT_TMS'] = testcase_REC_CRT_TMS     # 测试案例结果入库时间
+            self.testcaseinfo['REC_UPD_TMS'] = testcase_REC_CRT_TMS     # 测试案例结果更新时间
+            self.testcaseinfo['REC_CREATER'] = result_devops.creater                       # 测试案例结果创建人
+            self.testcaseinfo['REC_MODIFIER'] = result_devops.creater                      # 测试案例结果更新人
+            
+            logger.info('开始将测试结果写入devops库')
+            # 获取最终入库的对象-tuple类型
+            # print([n for n in self.testcaseinfo.values()])
+            caseresultinfo = tuple([n for n in self.testcaseinfo.values()])
+            logger.info(caseresultinfo)
+            sql = "insert into %s (`TASK_ID`, `BUILD_NUMBER`, `AUTO_TESTCASE_ID`, `ZH_NAME`, `CASE_NAME`, `TIMES`, `CALLED`, `PERFORM_TIME`, `EXECUTE_ST`, `PASSED`, `FAILED`, `VERIFY_P`, `VERIFY_F`, `AUTOCASE`, `DATA_ST`, `REC_CREATER`, `REC_CRT_TMS`, `REC_MODIFIER`, `REC_UPD_TMS`) VALUES (%s,'%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s','%s')"%((result_devops.table,)+ caseresultinfo)
+        
+            logger.info(sql)
+            lastrowid = self.devopsdb.getlastid(sql)
+            logger.info('Devops测试结果写入完成')
+        else:
+            pass
+        
 
         # o and e should be byte string because they are collected from stdout and stderr?
         if isinstance(o,str):

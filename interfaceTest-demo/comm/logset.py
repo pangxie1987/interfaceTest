@@ -11,7 +11,7 @@ import requests
 from comm.readjson import read
 from comm.config import project_conf
 
-url = read('commdata.json')['url']
+url = read('commdata.json')['gateway']
 logpath = os.path.join(os.path.dirname(os.path.dirname(__file__)), "report")
 print(logpath)
 
