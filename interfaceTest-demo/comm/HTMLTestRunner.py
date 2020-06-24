@@ -101,7 +101,7 @@ fapath = os.path.dirname(os.path.dirname(__file__))
 sys.path.append(fapath)
 from comm.mysql import mysqlconnect, mysqlconnectcommon
 from comm.config import result_db, result_devops, apicount, dblastid
-# from comm.objectsort import getapicount
+from comm.objectsort import getapicount
 from comm.logset import get_host_ip
 from comm.logset import logger
 from comm.devops_caseadd import devopscase_add
@@ -663,12 +663,6 @@ class HTMLTestRunner(Template_mixin):
             self.description = description
 
         self.startTime = datetime.datetime.now()
-        
-        # 测试案例执行结果插入devops数据库中
-        self.devopsdb = mysqlconnectcommon(result_devops.host, result_devops.port, result_devops.user, result_devops.password, result_devops.dbname)
-
-        # 测试结果汇总数据入库
-        self.testdb = mysqlconnectcommon(result_db.host, result_db.port, result_db.user, result_db.password, result_db.dbname)
 
         # 定义接口自动化测试案例对象
         self.apicaseinfo = {}
@@ -745,6 +739,8 @@ class HTMLTestRunner(Template_mixin):
             ipaddress = get_host_ip()
             logger.info(ipaddress)
             sql = "INSERT INTO %s (project, sucesss, error, fail, skip, total, starttime, duration, ipaddress) VALUES ('%s', %s, %s, %s, %s, %s, '%s', '%s', '%s')"%(result_db.table,result_db.project,result.success_count,result.error_count,result.failure_count,result.skip_count,total2,startTime,duration, ipaddress)
+            
+            self.testdb = mysqlconnectcommon(result_db.host, result_db.port, result_db.user, result_db.password, result_db.dbname)
         
             global dblastid
             logger.info(sql)
@@ -894,7 +890,7 @@ class HTMLTestRunner(Template_mixin):
                                     "TestingProcedureData": [] 
                                 }
                 # TestCaseData_1['autoTestcase'] = test_casename_e
-                TestCaseData_1['autoTestcase'] = result_devops.projectKey+'_'+test_casename_e   # 使用项目key+案例名称方式，避免重复
+                TestCaseData_1['autoTestcase'] = 'API_'+result_devops.projectKey+'_'+test_casename_e   # 使用项目key+案例名称方式，避免重复
                 TestCaseData_1['TestCase'] = test_casename_c
                 TestCaseData_1['TestingProcedureData'].append(TestingProcedureData_1)
 
@@ -911,18 +907,18 @@ class HTMLTestRunner(Template_mixin):
                 logger.info(self.apicaseinfo)
                 devopscase_add([self.apicaseinfo])    # 通过调用接口，将测试用例插入到devops库中
             except Exception as e:
-                # logger.info(e)
-                print(e)
+                logger.info(e)
         else:
             pass
 
         # print(self.testcaseinfo)
         if result_devops.isinsert == 1:
-            
+            # 测试案例执行结果插入devops数据库中
+            self.devopsdb = mysqlconnectcommon(result_devops.host, result_devops.port, result_devops.user, result_devops.password, result_devops.dbname)
             # 测试结果数据构建
             self.testcaseinfo['TASK_ID'] = result_devops.TASK_ID
             self.testcaseinfo['BUILD_NUMBER'] = result_devops.BUILD_NUMBER
-            self.testcaseinfo['AUTO_TESTCASE_ID'] = test_casename_e     # 自动化用例ID，取自动化用例的英文名称
+            self.testcaseinfo['AUTO_TESTCASE_ID'] = 'API_'+result_devops.projectKey+'_'+test_casename_e     # 自动化用例ID，取自动化用例的英文名称
             self.testcaseinfo['ZH_NAME'] = str(test_casename_c)
             self.testcaseinfo['CASE_NAME'] = test_casename_e
             self.testcaseinfo['TIMES'] = ''                                         # 执行次数，暂时设为常量1
@@ -943,6 +939,7 @@ class HTMLTestRunner(Template_mixin):
             logger.info(sql)
             lastrowid = self.devopsdb.getlastid(sql)
             logger.info('Devops测试结果写入完成')
+            self.devopsdb.closedb()
         else:
             pass
         
