@@ -67,6 +67,7 @@ class FileTree(unittest.TestCase):
     def test_a_table(self):
         '获取左侧目录列表-标准'
         r = requests.post(url=url+'document/table', data={"projectId":cdatas.projectid}, headers=header_www, cookies=self.cookie)
+        print(r.elapsed.total_seconds())    # 接口响应时间
         print(r.text)
         name_list = []
         for names in r.json():

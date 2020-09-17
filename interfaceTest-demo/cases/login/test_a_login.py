@@ -46,6 +46,7 @@ class Login(unittest.TestCase):
     def setUpClass(self):
         '获取登录页的cookie'
         r = requests.get(url=url+'/login')
+        print(r.elapsed.total_seconds())    # 接口响应时间
         print(r.url)        # 必须有这一行，统计接口数量用
         Login.mycookie = r.cookies.get_dict()
         if '获取验证码' in r.text:
